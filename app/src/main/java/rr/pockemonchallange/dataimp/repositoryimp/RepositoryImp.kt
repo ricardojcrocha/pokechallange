@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
+import rr.pockemonchallange.data.model.PokemonDto
 import rr.pockemonchallange.data.model.PokemonListDto
 import rr.pockemonchallange.data.model.PokemonSimpleDto
 import rr.pockemonchallange.data.repository.Repository
@@ -19,26 +20,28 @@ class RepositoryImp() : Repository {
         PokeAPI.create()
     }
 
-    override fun getPokeApi(): PokeAPI {
-        return pokeApiImp
+    override fun getPokemons(offset: Int,limit: Int) : MutableLiveData<PokemonListDto?>
+    {
+        return resultHandling(pokeApiImp.getPokemons(offset,limit),MutableLiveData<PokemonListDto?>())
     }
 
-    fun getPokemons() : MutableLiveData<PokemonListDto?>
+    override fun getPokemon(name: String) : MutableLiveData<PokemonDto?>
     {
-        val result: MutableLiveData<PokemonListDto?> = MutableLiveData(PokemonListDto(-1,"","",ArrayList<PokemonSimpleDto>()))
+        return resultHandling(pokeApiImp.getPokemon(name),MutableLiveData<PokemonDto?>())
+    }
 
-        pokeApiImp.getPokemons()
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(
-                {out -> result.value=out},
-                {
-                        error ->
-                    result.value=null
-                    Log.e(null,error.message)
-                }
-            )
-
+    fun <T> resultHandling(observable: Observable<T>, result: MutableLiveData<T?>) : MutableLiveData<T?>
+    {
+        observable.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        {out -> result.value=out},
+                        {
+                            error ->
+                            result.value=null
+                            Log.e(null,error.message)
+                        }
+                )
         return result
     }
 

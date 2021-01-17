@@ -7,6 +7,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
+import rr.pockemonchallange.data.model.PokemonDto
 import rr.pockemonchallange.data.model.PokemonListDto
 
 interface PokeAPI
@@ -27,10 +28,12 @@ interface PokeAPI
         }
     }
 
-    @GET("pokemon")
-    fun getPokemons() : Observable<PokemonListDto>
+    @GET("pokemon/")
+    fun getPokemons(@Query("offset") offset: Int,
+                    @Query("limit") limit: Int) : Observable<PokemonListDto>
 
-
+    @GET("pokemon/{name}")
+    fun getPokemon(@Path("name") name: String) : Observable<PokemonDto>
 
 
 //    // region Resource Lists
